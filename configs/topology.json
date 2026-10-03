@@ -1,0 +1,38 @@
+{
+  "controller": {
+    "ip": "REPLACE_WITH_CONTROLLER_IP",
+    "grpc_port": 9559,
+    "note": "Controller also runs a local switch for testing"
+  },
+  "edge_nodes": [
+    {
+      "name": "edge-01",
+      "ip": "REPLACE_WITH_EDGE_IP",
+      "grpc_port": 9559,
+      "device_id": 1,
+      "interfaces": ["eth0", "eth1"],
+      "role": "sfc-forwarder",
+      "enabled": false
+    },
+    {
+      "name": "edge-02",
+      "ip": "REPLACE_WITH_EDGE_IP",
+      "grpc_port": 9559,
+      "device_id": 2,
+      "interfaces": ["eth0", "eth1"],
+      "role": "sfc-forwarder",
+      "enabled": false
+    }
+  ],
+  "sfc_chains": [
+    {
+      "spi": 100,
+      "name": "chain-firewall-lb",
+      "hops": [
+        { "si": 255, "node": "edge-01", "port": 0 },
+        { "si": 254, "node": "edge-01", "port": 1 },
+        { "si": 253, "node": "edge-02", "port": 0 }
+      ]
+    }
+  ]
+}

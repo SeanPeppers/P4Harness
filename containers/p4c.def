@@ -1,0 +1,11 @@
+# P4 compiler (bmv2 simple_switch target) used as the deterministic gate.
+# Build:  apptainer build p4c.sif containers/p4c.def
+# Use:    export P4C_SIF=$PWD/p4c.sif   (agents/nodes.py picks it up)
+Bootstrap: docker
+From: p4lang/p4c:latest
+
+%test
+    p4c-bm2-ss --version
+
+%runscript
+    exec p4c-bm2-ss "$@"

@@ -1,0 +1,8 @@
+# Domain-adaptation (QLoRA/DoRA) only. Install torch for your CUDA version first:
+#   pip install torch --index-url https://download.pytorch.org/whl/cu121
+transformers
+peft
+trl
+datasets
+accelerate
+bitsandbytes

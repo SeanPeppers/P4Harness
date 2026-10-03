@@ -1,0 +1,29 @@
+cff-version: 1.2.0
+message: "If you use this software or data, please cite the paper below. Code is MIT-licensed; data/ is CC BY 4.0."
+title: "P4Harness"
+type: software
+license: MIT
+repository-code: "https://github.com/SeanPeppers/P4Harness"
+authors:
+  - given-names: Sean
+    family-names: Peppers
+  - given-names: Tiying
+    family-names: Gao
+  - given-names: Prasad
+    family-names: Calyam
+  - given-names: Chengyi
+    family-names: Qu
+preferred-citation:
+  type: article
+  title: "P4Harness: Autonomous P4 Network Policy Management and Verification Using Compiler-Gated Multi-Agent Pipelines"
+  notes: "Manuscript in preparation"
+  year: 2026
+  authors:
+    - given-names: Sean
+      family-names: Peppers
+    - given-names: Tiying
+      family-names: Gao
+    - given-names: Prasad
+      family-names: Calyam
+    - given-names: Chengyi
+      family-names: Qu

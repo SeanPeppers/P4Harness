@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.venv*/
+venv/
+.pytest_cache/
+experiments/results/
+memory/
+models/
+*.sif
+*.gguf
+Modelfile-*
+tests/test_generated_*.py

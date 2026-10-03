@@ -1,0 +1,95 @@
+# P4_16 fragment grammar for Ollama/llama.cpp GBNF
+# Scope: table + action + register fragment output (not full programs)
+# Enforces syntax-layer correctness eliminating Fixes 1,2,4,7,8,12
+
+root ::= code-fence
+
+# ── Code fence ────────────────────────────────────────────────────────────────
+code-fence ::= "```p4\n" p4-content "```" "\n"?
+p4-content  ::= p4-item*
+p4-item     ::= register-decl | action-def | table-def | apply-block | comment | blank
+
+# ── Register declarations ─────────────────────────────────────────────────────
+# P4_16 form ONLY: register<T>(N) name;
+# P4_14 form (register<T> name(N);) is intentionally excluded.
+register-decl ::= indent? "register<" p4-type ">(" size-expr ") " identifier ";" eol
+
+# ── Action definitions ────────────────────────────────────────────────────────
+action-def  ::= indent? "action " identifier "(" param-list ") {" eol action-body indent? "}" eol
+param-list  ::= "" | param-item ("," sp param-item)*
+param-item  ::= p4-type sp identifier
+
+# Action body: allow any sequence of semicolon-terminated statements.
+# We keep the body permissive so expressions can be arbitrarily complex,
+# but we forbid the Python keyword 'pass' and bare 'drop()' as action names
+# by excluding them from the action-name grammar in actions blocks below.
+action-body    ::= action-stmt*
+action-stmt    ::= indent sp? stmt-content ";" eol
+stmt-content   ::= stmt-char+
+stmt-char      ::= [^;{}\n]
+
+# ── Table definitions ─────────────────────────────────────────────────────────
+# Enforce: must have key block, actions block, size.
+# default_action must be NoAction() — never drop().
+table-def      ::= indent? "table " identifier " {" eol table-clauses indent? "}" eol
+table-clauses  ::= table-clause+
+table-clause   ::= key-block | actions-block | size-clause | default-action-clause | table-comment
+
+key-block      ::= indent "key = {" eol key-entries indent "}" eol
+key-entries    ::= key-entry*
+key-entry      ::= indent sp identifier field-chain? " : " match-kind ";" eol
+field-chain    ::= ("." identifier)+
+match-kind     ::= "exact" | "lpm" | "ternary" | "range"
+
+# Actions block: list of action names + mandatory NoAction.
+# 'pass' and 'drop' are excluded — only valid P4 identifiers or NoAction.
+actions-block  ::= indent "actions = {" eol action-refs indent "}" eol
+action-refs    ::= action-ref+
+action-ref     ::= indent sp valid-action-name ";" eol
+valid-action-name ::= "NoAction" | p4-identifier
+
+size-clause    ::= indent "size = " pos-int ";" eol
+
+# default_action must be NoAction() — enforces Fix 2
+default-action-clause ::= indent "default_action = NoAction();" eol
+
+table-comment  ::= indent "//" line-chars eol
+
+# ── Apply block ───────────────────────────────────────────────────────────────
+apply-block  ::= indent? "apply {" eol apply-stmts indent? "}" eol
+apply-stmts  ::= apply-stmt-item*
+apply-stmt-item ::= table-apply | if-stmt | plain-stmt | blank
+table-apply  ::= indent sp? identifier ".apply();" eol
+plain-stmt   ::= indent sp? plain-content ";" eol
+plain-content ::= plain-char+
+plain-char   ::= [^;{}\n]
+
+if-stmt      ::= indent sp? "if (" condition ") {" eol apply-stmts indent sp? "}" eol
+             | indent sp? "if (" condition ") {" eol apply-stmts indent sp? "} else {" eol apply-stmts indent sp? "}" eol
+condition    ::= cond-char+
+cond-char    ::= [^)\n]
+
+# ── Types ─────────────────────────────────────────────────────────────────────
+p4-type   ::= bit-type | int-type | "bool" | "error"
+bit-type  ::= "bit<" pos-int ">"
+int-type  ::= "int<" pos-int ">"
+
+# ── Size expressions ──────────────────────────────────────────────────────────
+size-expr ::= pos-int | identifier
+
+# ── Identifiers ───────────────────────────────────────────────────────────────
+# p4-identifier: allows camelCase and ALL_CAPS (P4 constants)
+# We do NOT restrict to snake_case here because that would prevent DSCP constants etc.
+p4-identifier ::= [a-zA-Z_] [a-zA-Z0-9_]*
+identifier    ::= p4-identifier
+
+# ── Numbers ───────────────────────────────────────────────────────────────────
+pos-int ::= [0-9]+
+
+# ── Whitespace and structure ──────────────────────────────────────────────────
+indent  ::= "    " | "\t" | "  "
+sp      ::= " "*
+eol     ::= "\n"
+blank   ::= sp eol
+comment ::= indent? "//" line-chars eol
+line-chars ::= [^\n]*

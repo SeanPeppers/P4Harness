@@ -1,0 +1,16 @@
+[project]
+name = "p4harness"
+version = "1.0.0"
+description = "Compiler-gated multi-agent LLM pipeline for P4 network policy synthesis"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.12"
+# Runtime dependencies live in requirements.txt (single source of truth).
+dependencies = []
+
+[project.scripts]
+p4harness = "run:app"
+
+[build-system]
+requires      = ["hatchling"]
+build-backend = "hatchling.build"

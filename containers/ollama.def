@@ -1,0 +1,8 @@
+# Ollama server for the local LLM agents (needs --nv for GPU).
+# Build:  apptainer build ollama.sif containers/ollama.def
+# Run:    apptainer exec --nv --bind "$OLLAMA_MODELS:/root/.ollama" ollama.sif ollama serve
+Bootstrap: docker
+From: ollama/ollama:latest
+
+%runscript
+    exec ollama "$@"
